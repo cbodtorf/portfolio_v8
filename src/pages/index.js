@@ -1,21 +1,39 @@
-import React from 'react';
+import React, { Component } from 'react';
 import Layout from '../components/Layout';
+import WindowFrame from '../components/WindowFrame';
 import Landing from '../sections/Landing';
-import About from '../sections/About';
 import Projects from '../sections/Projects';
-import Writing from '../sections/Writing';
+import About from '../sections/About';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
-const IndexPage = () => (
-  <Layout>
-    <Header />
-    <Landing />
-    <About />
-    <Projects />
-    <Writing />
-    <Footer />
-  </Layout>
-);
+class IndexPage extends Component {
+  constructor(props) {
+    super(props);
+    console.log('this.props', props);
+
+    this.state = {
+      actionColor: false,
+    };
+  }
+
+  updateActionColor = color => {
+    console.log('this', this);
+    this.setState({ actionColor: color });
+  };
+
+  render() {
+    return (
+      <Layout>
+        <WindowFrame actionColor={this.state.actionColor} />
+        <Header />
+        <Landing />
+        <About />
+        <Projects handleActionColor={this.updateActionColor} />
+        <Footer />
+      </Layout>
+    );
+  }
+}
 
 export default IndexPage;

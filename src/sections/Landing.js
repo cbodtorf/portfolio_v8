@@ -1,110 +1,184 @@
 import React, { Fragment } from 'react';
+import { Parallax, ParallaxProvider } from 'react-scroll-parallax';
+
 import { StaticQuery, graphql } from 'gatsby';
-import { Heading, Flex, Box, Text } from 'rebass';
-import TextLoop from 'react-text-loop';
+import { Image, Text } from 'rebass';
+import styled from 'styled-components';
+import Fade from 'react-reveal/Fade';
 import { SectionLink } from 'react-scroll-section';
 import Section from '../components/Section';
-import SocialLink from '../components/SocialLink';
 import MouseIcon from '../components/MouseIcon';
-import Triangle from '../components/Triangle';
+import Scramble from '../components/Scramble';
+import phoneImage from '../img/iphony.png';
+import { getRandomInt } from '../utils/misc';
 
-const Background = () => (
-  <div>
-    <Triangle
-      color="backgroundDark"
-      height={['35vh', '80vh']}
-      width={['95vw', '60vw']}
-    />
+import Loadable from 'react-loadable';
 
-    <Triangle
-      color="secondary"
-      height={['38vh', '80vh']}
-      width={['50vw', '35vw']}
-    />
+const dynamics = Loadable({
+  loader: () => import('dynamics.js'),
+  loading() {
+    return <div>Loading...</div>;
+  },
+});
 
-    <Triangle
-      color="primaryDark"
-      height={['25vh', '35vh']}
-      width={['75vw', '60vw']}
-      invertX
-    />
+const Grid = Loadable({
+  loader: () => import('react-isometric-grid'),
+  loading() {
+    return <div>Loading...</div>;
+  },
+  render(loaded, props) {
+    const Cell = loaded.Cell;
+    const IsometricGrid = loaded.default;
+    const cases = props.cases || { edges: [] };
+    const date_sort_desc = (a, b) => {
+      // This is a comparison function that will result in dates being sorted in
+      // ASCENDING order. As you can see, JavaScript's native comparison operators
+      // can be used to compare dates. This was news to me.
+      if (a.node.year > b.node.year) return -1;
+      if (a.node.year < b.node.year) return 1;
+      return 0;
+    };
 
-    <Triangle
-      color="backgroundDark"
-      height={['20vh', '20vh']}
-      width={['100vw', '100vw']}
-      invertX
-      invertY
-    />
-  </div>
-);
+    return (
+      <IsometricGrid
+        shadow
+        transform="rotateX(45deg) rotateZ(45deg)"
+        stackItemsAnimation={{
+          properties: function(pos) {
+            return {
+              translateZ: (pos + 1) * 50,
+              rotateZ: getRandomInt(-3, 3),
+            };
+          },
+          options: function(pos, itemstotal) {
+            return {
+              type: dynamics.bezier,
+              duration: 500,
+              points: [
+                { x: 0, y: 0, cp: [{ x: 0.2, y: 1 }] },
+                { x: 1, y: 1, cp: [{ x: 0.3, y: 1 }] },
+              ],
+              delay: (itemstotal - pos - 1) * 40,
+            };
+          },
+        }}
+        style={{ height: '800px', width: '900px' }}
+        layerStyle={{ height: '200px', width: '100px' }}
+      >
+        {cases.edges.sort(date_sort_desc).map(({ node }, i) => (
+          <Cell
+            title={node.title}
+            key={i + node.title}
+            index={i}
+            style={{ height: '100px', width: '200px' }}
+            layerStyle={{ height: '100px', width: '200px' }}
+            layers={[
+              `${node.heroImage ? node.heroImage.file.url : '#2A324B'}`,
+              '#767B91',
+              '#C7CCDB',
+              '#E1E5EE',
+              <PhoneImage src={`${phoneImage}`} />,
+            ]}
+          />
+        ))}
+      </IsometricGrid>
+    );
+  },
+});
 
-const centerHorizontally = { marginRight: 'auto', marginLeft: 'auto' };
+const PhoneImage = styled(Image)`
+  z-index: 999;
+  border-radius: 15px;
+`;
 
 const LandingPage = () => (
-  <Section.Container id="home" Background={Background}>
+  <Section.Container id="home">
     <StaticQuery
       query={graphql`
-        query SiteTitleQuery {
-          contentfulAbout {
-            name
-            roles
-            socialLinks {
-              id
-              url
-              name
-              fontAwesomeIcon
+        query Case {
+          cases: allContentfulCase {
+            edges {
+              node {
+                id
+                title
+                type
+                description {
+                  description
+                }
+                heroImage {
+                  file {
+                    fileName
+                    url
+                  }
+                }
+                year
+              }
             }
           }
         }
       `}
-      render={data => {
-        const { name, socialLinks, roles } = data.contentfulAbout;
+      render={({ cases }) => (
+        <Fragment>
+          <ParallaxProvider>
+            <Parallax className="" x={[19, -5]} tagOuter="figure">
+              <Text fontSize={[3, 4, 5]} fontWeight="bold" color="#2A324B">
+                Caleb
+              </Text>
+            </Parallax>
+            <Parallax className="" x={[15, -5]} tagOuter="figure">
+              <Scramble
+                name="verb"
+                el={
+                  <Text fontSize={[3, 4, 5]} fontWeight="bold" color="#2A324B">
+                    <div className="verb">Inspires</div>
+                  </Text>
+                }
+                wordList={[
+                  'Inspires',
+                  'Empowers',
+                  'Challenges',
+                  'Organizes',
+                  'Loves',
+                  'Codes',
+                  'Plays Music With',
+                  'Challenges',
+                ]}
+              />
+            </Parallax>
+            <Parallax className="" x={[10, -3]} tagOuter="figure">
+              <Scramble
+                name="noun"
+                el={
+                  <Text fontSize={[3, 4, 5]} fontWeight="bold" color="#2A324B">
+                    <div className="noun">Creativity</div>
+                  </Text>
+                }
+                wordList={[
+                  'Creativity',
+                  'The Team',
+                  'Everything',
+                  'Stuff by Color',
+                  'Randomizers',
+                  'Like a damn boss',
+                  'Sexbruise?',
+                  'The Game',
+                ]}
+              />
+            </Parallax>
 
-        return (
-          <Fragment>
-            <Heading
-              textAlign="center"
-              as="h2"
-              color="primary"
-              fontSize={[5, 6, 8]}
-              mb={[3, 4, 5]}
-            >
-              {`Hello, I'm ${name}!`}
-            </Heading>
-
-            <Heading
-              as="h2"
-              color="primary"
-              fontSize={[4, 5, 6]}
-              mb={[3, 5]}
-              textAlign="center"
-              style={centerHorizontally}
-            >
-              <TextLoop interval={5000}>
-                {roles
-                  .sort(() => Math.random() - 0.5)
-                  .map(text => (
-                    <Text width={[300, 500]} key={text}>
-                      {text}
-                    </Text>
-                  ))}
-              </TextLoop>
-            </Heading>
-
-            <Flex alignItems="center" justifyContent="center" flexWrap="wrap">
-              {socialLinks.map(({ id, ...rest }) => (
-                <Box mx={3} fontSize={[5, 6, 6]} key={id}>
-                  <SocialLink {...rest} />
-                </Box>
-              ))}
-            </Flex>
-            <SectionLink section="about">
-              {({ onClick }) => <MouseIcon onClick={onClick} />}
-            </SectionLink>
-          </Fragment>
-        );
-      }}
+            <Fade left delay={600}>
+              <Parallax
+                className="custom-class"
+                x={[-150, 100]}
+                y={[25, -50]}
+                tagOuter="figure"
+              >
+                <Grid cases={cases} />
+              </Parallax>
+            </Fade>
+          </ParallaxProvider>
+        </Fragment>
+      )}
     />
   </Section.Container>
 );

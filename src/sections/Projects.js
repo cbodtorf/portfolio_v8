@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { Image, Text, Flex, Box } from 'rebass';
 import { StaticQuery, graphql } from 'gatsby';
@@ -7,207 +7,314 @@ import Fade from 'react-reveal/Fade';
 import Section from '../components/Section';
 import { CardContainer, Card } from '../components/Card';
 import SocialLink from '../components/SocialLink';
-import Triangle from '../components/Triangle';
 import ImageSubtitle from '../components/ImageSubtitle';
 import Hide from '../components/Hide';
+import { getRandomInt, getRandomColor } from '../utils/misc';
 
-const Background = () => (
-  <div>
-    <Triangle
-      color="secondaryLight"
-      height={['80vh', '80vh']}
-      width={['100vw', '100vw']}
-      invertX
-    />
-
-    <Triangle
-      color="background"
-      height={['50vh', '20vh']}
-      width={['50vw', '50vw']}
-      invertX
-    />
-
-    <Triangle
-      color="primaryDark"
-      height={['25vh', '40vh']}
-      width={['75vw', '60vw']}
-      invertX
-      invertY
-    />
-
-    <Triangle
-      color="backgroundDark"
-      height={['25vh', '20vh']}
-      width={['100vw', '100vw']}
-      invertY
-    />
-  </div>
-);
-
-const CARD_HEIGHT = '200px';
-
-const MEDIA_QUERY_SMALL = '@media (max-width: 400px)';
-
-const Title = styled(Text)`
-  font-size: 14px;
-  font-weight: 600;
-  text-transform: uppercase;
-  display: table;
-  border-bottom: ${props => props.theme.colors.primary} 5px solid;
+const FadeWrapper = styled.div`
+  width: 100%;
 `;
 
-const TextContainer = styled.div`
+const ListWrapper = styled(Flex)`
+  width: calc(100% - 100px);
+  min-height: calc(100vh - 200px);
+  max-width: 520px;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  position: relative;
+  margin: 0 auto;
+  flex-direction: column;
+`;
+
+const ListItem = styled.li`
+  width: 100%;
+  height: 50px;
+  display: block;
+  position: relative;
+  float: left;
+  -webkit-transition: all 0.3s linear, opacity 0.2s linear;
+  transition: all 0.3s linear, opacity 0.2s linear;
+
+  &:before {
+    content: '';
+    width: 100%;
+    height: 2px;
+    position: absolute;
+    background-color: #272727;
+    opacity: 0.08;
+    top: 14px;
+    left: 0;
+    z-index: 1;
+    -webkit-transition: all 0.2s linear;
+    transition: all 0.2s linear;
+  }
+`;
+
+const ListItemLink = styled.a`
+  width: 100%;
+  display: block;
+  position: relative;
+  border: 0;
+  float: left;
+  z-index: 4;
+  overflow: hidden;
+  opacity: 0.7;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 1;
+  }
+`;
+
+const ListItemTitleWrapper = styled.div`
+  display: block;
+  float: left;
+  position: relative;
+
+  &:before {
+    content: '';
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    background-color: #f7f9f4;
+    left: 0;
+    z-index: 2;
+  }
+`;
+
+const ListItemTitle = styled(Text)`
+  width: calc(100% - 8px);
+  height: 40px;
+  display: block;
+  position: relative;
+  padding-right: 8px;
+  white-space: nowrap;
+  z-index: 3;
+  float: left;
+`;
+
+const ListItemMarkerWrapper = styled.div`
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 4;
+  -webkit-transition: all 0.15s linear;
+  transition: all 0.15s linear;
+
+  &:before {
+    content: '';
+    width: 6px;
+    height: 100%;
+    position: absolute;
+    background: -webkit-gradient(
+      linear,
+      left top,
+      right top,
+      from(rgba(255, 255, 255, 0)),
+      color-stop(50%, #f7f9f4),
+      to(#f7f9f4)
+    );
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0%,
+      #f7f9f4 50%,
+      #f7f9f4 100%
+    );
+    top: 0;
+    right: 100%;
+    z-index: 1;
+  }
+  &:after {
+    content: '';
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    background-color: #f7f9f4;
+    top: 0;
+    right: 0;
+    z-index: 1;
+  }
+`;
+
+const ListItemMarker = styled(Text)`
+  position: relative;
+  opacity: 0.5;
+  z-index: 2;
+`;
+
+const FilterList = styled.ul`
   display: flex;
   flex-direction: column;
-  padding: 10px;
-  width: 100%;
-  width: calc(100% - ${CARD_HEIGHT});
-
-  ${MEDIA_QUERY_SMALL} {
-    width: calc(100% - (${CARD_HEIGHT} / 2));
-  }
+  position: -webkit-sticky;
+  position: sticky;
+  top: 50%;
+  align-items: flex-end;
 `;
 
-const ImageContainer = styled.div`
-  margin: auto;
-  width: ${CARD_HEIGHT};
-
-  ${MEDIA_QUERY_SMALL} {
-    width: calc(${CARD_HEIGHT} / 2);
-  }
-`;
-
-const ProjectImage = styled(Image)`
-  width: ${CARD_HEIGHT};
-  height: ${CARD_HEIGHT};
-  padding: 40px;
-  margin-top: 0px;
-
-  ${MEDIA_QUERY_SMALL} {
-    height: calc(${CARD_HEIGHT} / 2);
-    width: calc(${CARD_HEIGHT} / 2);
-    margin-top: calc(${CARD_HEIGHT} / 4);
-    padding: 10px;
-  }
-`;
-
-const ProjectTag = styled.div`
+const FilterListItem = styled(Text)`
+  font-size: 15px;
+  line-height: 18px;
+  display: inline-block;
   position: relative;
-  height: ${CARD_HEIGHT};
-  top: calc(
-    -${CARD_HEIGHT} - 3.5px
-  ); /*don't know why I have to add 3.5px here ... */
+  padding-right: 12px;
+  -webkit-transition: all 0.2s linear;
+  transition: all 0.2s linear;
+  cursor: pointer;
+  opacity: 0.3;
 
-  ${MEDIA_QUERY_SMALL} {
-    top: calc(-${CARD_HEIGHT} - 3.5px + (${CARD_HEIGHT} / 4));
+  &:after {
+    content: '➬';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    position: absolute;
+    top: 0px;
+    right: 1px;
+    -webkit-transition: all 0.2s linear;
+    transition: all 0.2s linear;
+  }
+
+  &.selected,
+  &:hover {
+    opacity: 1;
   }
 `;
 
-const Project = ({
-  name,
-  description,
-  projectUrl,
-  repositoryUrl,
-  type,
-  publishedDate,
-  logo,
-}) => (
-  <Card p={0}>
-    <Flex style={{ height: CARD_HEIGHT }}>
-      <TextContainer>
-        <span>
-          <Title my={2} pb={1}>
-            {name}
-          </Title>
-        </span>
-        <Text width={[1]} style={{ overflow: 'auto' }}>
-          {description}
-        </Text>
-      </TextContainer>
+class ProjectList extends Component {
+  constructor(props) {
+    super(props);
 
-      <ImageContainer>
-        <ProjectImage src={logo.image.src} alt={logo.title} />
-        <ProjectTag>
-          <Flex
-            style={{
-              float: 'right',
-            }}
-          >
-            <Box mx={1} fontSize={5}>
-              <SocialLink
-                name="Check repository"
-                fontAwesomeIcon="github"
-                url={repositoryUrl}
-              />
-            </Box>
-            <Box mx={1} fontSize={5}>
-              <SocialLink
-                name="See project"
-                fontAwesomeIcon="globe"
-                url={projectUrl}
-              />
-            </Box>
-          </Flex>
-          <ImageSubtitle bg="primary" color="white" y="bottom" x="right" round>
-            {type}
-          </ImageSubtitle>
-          <Hide query={MEDIA_QUERY_SMALL}>
-            <ImageSubtitle bg="backgroundDark">{publishedDate}</ImageSubtitle>
-          </Hide>
-        </ProjectTag>
-      </ImageContainer>
-    </Flex>
-  </Card>
-);
+    this.state = {
+      selectedFilter: { type: 'All', color: '#272727' },
+      filters: [],
+    };
+  }
 
-Project.propTypes = {
-  name: PropTypes.string.isRequired,
-  description: PropTypes.string.isRequired,
-  projectUrl: PropTypes.string.isRequired,
-  repositoryUrl: PropTypes.string.isRequired,
-  type: PropTypes.string.isRequired,
-  publishedDate: PropTypes.string.isRequired,
-  logo: PropTypes.shape({
-    image: PropTypes.shape({
-      src: PropTypes.string,
-    }),
-    title: PropTypes.string,
-  }).isRequired,
-};
+  componentDidMount() {
+    const { cases } = this.props;
+    const filters = cases.edges
+      // reduce type comma delimited strings into array of filter types
+      .reduce(
+        (list, { node }) => {
+          return list.concat(node.type.split(', '));
+        },
+        ['All'],
+      )
+      // filter out duplicates
+      .filter((value, index, self) => {
+        return self.indexOf(value) === index;
+      })
+      // map random color to each type
+      .map(type => {
+        const color = getRandomColor();
+        return { type, color };
+      });
 
-const Projects = () => (
-  <Section.Container id="projects" Background={Background}>
-    <Section.Header name="Projects" icon="💻" label="notebook" />
+    this.setState({ filters });
+  }
+
+  render() {
+    return (
+      <Flex>
+        <div>
+          <FilterList>
+            {this.state.filters.map(({ type, color }, i) => {
+              return (
+                <Fade left delay={500} key={i}>
+                  <FilterListItem
+                    className={
+                      this.state.selectedFilter.type === type ? 'selected' : ''
+                    }
+                    style={{ color }}
+                    onClick={() => {
+                      var element = document.getElementById('projects');
+                      element.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'end',
+                        inline: 'nearest',
+                      });
+                      this.props.handleActionColor(color);
+                      this.setState({ selectedFilter: { type, color } });
+                    }}
+                  >
+                    {type}
+                  </FilterListItem>
+                </Fade>
+              );
+            })}
+          </FilterList>
+        </div>
+
+        <FadeWrapper>
+          <Fade bottom delay={100}>
+            <ListWrapper>
+              {this.props.cases.edges
+                .filter(
+                  ({ node }) =>
+                    node.type.includes(this.state.selectedFilter.type) ||
+                    this.state.selectedFilter.type === 'All',
+                )
+                .map(({ node }, i) => {
+                  const randUnicode = String.fromCharCode(
+                    '0x' + 29 + getRandomInt(0, 255).toString(16),
+                  );
+                  const color = this.state.selectedFilter.color;
+                  return (
+                    <ListItem key={i}>
+                      <ListItemLink>
+                        <ListItemTitleWrapper className="title">
+                          <ListItemTitle color={color}>
+                            {node.title}
+                          </ListItemTitle>
+                        </ListItemTitleWrapper>
+                        <ListItemMarkerWrapper className="marker">
+                          <ListItemMarker color={color}>
+                            {randUnicode}
+                          </ListItemMarker>
+                        </ListItemMarkerWrapper>
+                      </ListItemLink>
+                    </ListItem>
+                  );
+                })}
+            </ListWrapper>
+          </Fade>
+        </FadeWrapper>
+      </Flex>
+    );
+  }
+}
+
+const Projects = props => (
+  <Section.Container id="projects">
+    <Section.Header name="Projects" />
     <StaticQuery
       query={graphql`
-        query ProjectsQuery {
-          contentfulAbout {
-            projects {
-              id
-              name
-              description
-              projectUrl
-              repositoryUrl
-              publishedDate(formatString: "YYYY")
-              type
-              logo {
+        query Project {
+          cases: allContentfulCase {
+            edges {
+              node {
+                id
                 title
-                image: resize(width: 200, quality: 100) {
-                  src
+                type
+                description {
+                  description
+                }
+                heroImage {
+                  file {
+                    fileName
+                    url
+                  }
                 }
               }
             }
           }
         }
       `}
-      render={({ contentfulAbout }) => (
-        <CardContainer minWidth="350px">
-          {contentfulAbout.projects.map((p, i) => (
-            <Fade bottom delay={i * 200} key={p.id}>
-              <Project {...p} />
-            </Fade>
-          ))}
-        </CardContainer>
+      render={({ cases }) => (
+        <ProjectList
+          handleActionColor={props.handleActionColor}
+          cases={cases}
+        />
       )}
     />
   </Section.Container>
