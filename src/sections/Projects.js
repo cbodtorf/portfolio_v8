@@ -1,15 +1,10 @@
-import React, { Component, Fragment } from 'react';
-import PropTypes from 'prop-types';
-import { Image, Text, Flex, Box } from 'rebass';
+import React, { Component } from 'react';
+import { Text, Flex } from 'rebass';
 import { StaticQuery, graphql } from 'gatsby';
 import styled from 'styled-components';
 import Fade from 'react-reveal/Fade';
 import Section from '../components/Section';
-import { CardContainer, Card } from '../components/Card';
-import SocialLink from '../components/SocialLink';
-import ImageSubtitle from '../components/ImageSubtitle';
-import Hide from '../components/Hide';
-import { getRandomInt, getRandomColor } from '../utils/misc';
+import { getRandomInt, randDarkColor } from '../utils/misc';
 
 const FadeWrapper = styled.div`
   width: 100%;
@@ -48,6 +43,11 @@ const ListItem = styled.li`
     -webkit-transition: all 0.2s linear;
     transition: all 0.2s linear;
   }
+  &:hover {
+    &:before {
+      opacity: 0.7;
+    }
+  }
 `;
 
 const ListItemLink = styled.a`
@@ -57,8 +57,6 @@ const ListItemLink = styled.a`
   border: 0;
   float: left;
   z-index: 4;
-  overflow: hidden;
-  opacity: 0.7;
   cursor: pointer;
 
   &:hover {
@@ -160,7 +158,7 @@ const FilterListItem = styled(Text)`
   -webkit-transition: all 0.2s linear;
   transition: all 0.2s linear;
   cursor: pointer;
-  opacity: 0.3;
+  opacity: 0.6;
 
   &:after {
     content: '➬';
@@ -206,7 +204,7 @@ class ProjectList extends Component {
       })
       // map random color to each type
       .map(type => {
-        const color = getRandomColor();
+        const color = randDarkColor();
         return { type, color };
       });
 

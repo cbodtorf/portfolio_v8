@@ -5,9 +5,7 @@ import { StaticQuery, graphql } from 'gatsby';
 import { Image, Text } from 'rebass';
 import styled from 'styled-components';
 import Fade from 'react-reveal/Fade';
-import { SectionLink } from 'react-scroll-section';
 import Section from '../components/Section';
-import MouseIcon from '../components/MouseIcon';
 import Scramble from '../components/Scramble';
 import phoneImage from '../img/iphony.png';
 import { getRandomInt } from '../utils/misc';
@@ -46,8 +44,8 @@ const Grid = Loadable({
         stackItemsAnimation={{
           properties: function(pos) {
             return {
-              translateZ: (pos + 1) * 50,
-              rotateZ: getRandomInt(-3, 3),
+              translateZ: (pos + 1) * 25,
+              rotateZ: getRandomInt(-5, 5),
             };
           },
           options: function(pos, itemstotal) {
@@ -58,7 +56,7 @@ const Grid = Loadable({
                 { x: 0, y: 0, cp: [{ x: 0.2, y: 1 }] },
                 { x: 1, y: 1, cp: [{ x: 0.3, y: 1 }] },
               ],
-              delay: (itemstotal - pos - 1) * 40,
+              delay: (itemstotal - pos - 1) * 30,
             };
           },
         }}
