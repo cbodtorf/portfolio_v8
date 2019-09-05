@@ -48,6 +48,10 @@ const ListItem = styled.li`
       opacity: 0.7;
     }
   }
+
+  ${ListWrapper}.hover-active &:not(.hover-active) {
+    opacity: 0.3;
+  }
 `;
 
 const ListItemLink = styled.a`
@@ -58,6 +62,7 @@ const ListItemLink = styled.a`
   float: left;
   z-index: 4;
   cursor: pointer;
+  font-weight: bold;
 
   &:hover {
     opacity: 1;
@@ -151,6 +156,7 @@ const FilterList = styled.ul`
 
 const FilterListItem = styled(Text)`
   font-size: 15px;
+  font-weight: bold;
   line-height: 18px;
   display: inline-block;
   position: relative;
@@ -176,6 +182,10 @@ const FilterListItem = styled(Text)`
   &:hover {
     opacity: 1;
   }
+
+  ${FilterList}.hover-active &:not(.hover-active) {
+    opacity: 0.3;
+  }
 `;
 
 class ProjectList extends Component {
@@ -185,6 +195,8 @@ class ProjectList extends Component {
     this.state = {
       selectedFilter: { type: 'All', color: '#272727' },
       filters: [],
+      hoveredCase: null,
+      hoveredFilter: null,
     };
   }
 
@@ -215,14 +227,21 @@ class ProjectList extends Component {
     return (
       <Flex>
         <div>
-          <FilterList>
+          <FilterList
+            className={this.state.hoveredFilter !== null ? 'hover-active' : ''}
+          >
             {this.state.filters.map(({ type, color }, i) => {
               return (
                 <Fade left delay={500} key={i}>
                   <FilterListItem
-                    className={
-                      this.state.selectedFilter.type === type ? 'selected' : ''
-                    }
+                    className={`
+                      ${
+                        this.state.selectedFilter.type === type
+                          ? 'selected'
+                          : ''
+                      }
+                      ${this.state.hoveredFilter === type ? 'hover-active' : ''}
+                    `}
                     style={{ color }}
                     onClick={() => {
                       var element = document.getElementById('projects');
@@ -234,6 +253,8 @@ class ProjectList extends Component {
                       this.props.handleActionColor(color);
                       this.setState({ selectedFilter: { type, color } });
                     }}
+                    onMouseEnter={() => this.setState({ hoveredFilter: type })}
+                    onMouseLeave={() => this.setState({ hoveredFilter: null })}
                   >
                     {type}
                   </FilterListItem>
@@ -245,7 +266,9 @@ class ProjectList extends Component {
 
         <FadeWrapper>
           <Fade bottom delay={100}>
-            <ListWrapper>
+            <ListWrapper
+              className={this.state.hoveredCase !== null ? 'hover-active' : ''}
+            >
               {this.props.cases.edges
                 .filter(
                   ({ node }) =>
@@ -258,7 +281,18 @@ class ProjectList extends Component {
                   );
                   const color = this.state.selectedFilter.color;
                   return (
-                    <ListItem key={i}>
+                    <ListItem
+                      key={i}
+                      className={
+                        this.state.hoveredCase === node.title
+                          ? 'hover-active'
+                          : ''
+                      }
+                      onMouseEnter={() =>
+                        this.setState({ hoveredCase: node.title })
+                      }
+                      onMouseLeave={() => this.setState({ hoveredCase: null })}
+                    >
                       <ListItemLink>
                         <ListItemTitleWrapper className="title">
                           <ListItemTitle color={color}>
